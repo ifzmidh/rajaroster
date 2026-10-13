@@ -220,9 +220,8 @@ const faqs = [
 
 type LightboxImage = { src: string; alt: string; caption: string };
 
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby0-_-HqQC7buyUQw_wOMNkaZkQ7eknVsMUTSduhGtKwMvPCTz_FriorUR8-1-oKHtZBA/exec";
-const WHATSAPP_TARGET = "6287776273282";
+const SCRIPT_URL = import.meta.env["APP_SCRIPT_URL"] || "";
+const WHATSAPP_TARGET = import.meta.env["WHATSAPP_TARGET"] || "";
 
 async function sendToSheetAndRedirect(
   nama: string,
