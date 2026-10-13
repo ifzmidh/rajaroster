@@ -220,6 +220,32 @@ const faqs = [
 
 type LightboxImage = { src: string; alt: string; caption: string };
 
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycby0-_-HqQC7buyUQw_wOMNkaZkQ7eknVsMUTSduhGtKwMvPCTz_FriorUR8-1-oKHtZBA/exec";
+const WHATSAPP_TARGET = "6287776273282";
+
+async function sendToSheetAndRedirect(
+  nama: string,
+  whatsapp: string,
+  pesan: string,
+) {
+  const payload = { nama, whatsapp, pesan };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    console.error("Gagal simpan ke sheet:", error);
+  } finally {
+    const text = encodeURIComponent(`Halo, saya ${nama}. ${pesan}`);
+    window.location.href = `https://wa.me/${WHATSAPP_TARGET}?text=${text}`;
+  }
+}
+
 function RajaRosterPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -828,19 +854,30 @@ function OrderSection({
   const [status, setStatus] = useState<"default" | "error" | "success">(
     "default",
   );
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    if (
-      !String(form.get("nama") ?? "").trim() ||
-      !String(form.get("produk") ?? "").trim() ||
-      !String(form.get("jumlah") ?? "").trim()
-    ) {
+    const nama = String(form.get("nama") ?? "").trim();
+    const produk = String(form.get("produk") ?? "").trim();
+    const jumlah = String(form.get("jumlah") ?? "").trim();
+    const whatsapp = String(form.get("whatsapp") ?? "").trim();
+    const catatan = String(form.get("catatan") ?? "").trim();
+
+    if (!nama || !produk || !jumlah || !whatsapp) {
       setStatus("error");
       return;
     }
-    // Future webhook request will be connected here using the formatted form payload.
+
+    const pesan = [
+      `Produk: ${produk}`,
+      `Jumlah: ${jumlah}`,
+      catatan ? `Catatan: ${catatan}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     setStatus("success");
+    await sendToSheetAndRedirect(nama, whatsapp, pesan);
   };
   return (
     <section id="pesan" className="bg-card px-4 py-20 sm:px-6 lg:px-8">
@@ -865,6 +902,16 @@ function OrderSection({
                 placeholder="Contoh: Pak Herman"
               />
             </Field>
+            <Field label="Nomor WhatsApp *">
+              <input
+                name="whatsapp"
+                type="tel"
+                className={fieldClass}
+                placeholder="Contoh: 0812-3456-7890"
+              />
+            </Field>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
             <Field label="Produk yang Diminati *">
               <select
                 name="produk"
@@ -882,14 +929,14 @@ function OrderSection({
                 <option>Lainnya / Diskusi Jumlah</option>
               </select>
             </Field>
+            <Field label="Perkiraan Jumlah Kebutuhan *">
+              <input
+                name="jumlah"
+                className={fieldClass}
+                placeholder="Contoh: 150 pcs roster / 5 meter batu alam"
+              />
+            </Field>
           </div>
-          <Field label="Perkiraan Jumlah Kebutuhan *">
-            <input
-              name="jumlah"
-              className={fieldClass}
-              placeholder="Contoh: 150 pcs roster / 5 meter batu alam"
-            />
-          </Field>
           <Field label="Catatan Tambahan / Alamat Pengiriman">
             <textarea
               name="catatan"
