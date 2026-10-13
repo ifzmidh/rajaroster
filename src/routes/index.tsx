@@ -227,9 +227,11 @@ const WHATSAPP_TARGET = "6287776273282";
 async function sendToSheetAndRedirect(
   nama: string,
   whatsapp: string,
+  product: string,
+  quantity: string,
   pesan: string,
 ) {
-  const payload = { nama, whatsapp, pesan };
+  const payload = { nama, whatsapp, product, quantity, pesan };
 
   try {
     await fetch(SCRIPT_URL, {
@@ -242,7 +244,8 @@ async function sendToSheetAndRedirect(
     console.error("Gagal simpan ke sheet:", error);
   } finally {
     const text = encodeURIComponent(`Halo, saya ${nama}. ${pesan}`);
-    window.location.href = `https://wa.me/${WHATSAPP_TARGET}?text=${text}`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_TARGET}?text=${text}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
 }
 
@@ -858,26 +861,20 @@ function OrderSection({
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const nama = String(form.get("nama") ?? "").trim();
-    const produk = String(form.get("produk") ?? "").trim();
-    const jumlah = String(form.get("jumlah") ?? "").trim();
+    const product = String(form.get("produk") ?? "").trim();
+    const quantity = String(form.get("jumlah") ?? "").trim();
     const whatsapp = String(form.get("whatsapp") ?? "").trim();
     const catatan = String(form.get("catatan") ?? "").trim();
 
-    if (!nama || !produk || !jumlah || !whatsapp) {
+    if (!nama || !product || !quantity || !whatsapp) {
       setStatus("error");
       return;
     }
 
-    const pesan = [
-      `Produk: ${produk}`,
-      `Jumlah: ${jumlah}`,
-      catatan ? `Catatan: ${catatan}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const pesan = catatan ? `Catatan: ${catatan}` : "";
 
     setStatus("success");
-    await sendToSheetAndRedirect(nama, whatsapp, pesan);
+    await sendToSheetAndRedirect(nama, whatsapp, product, quantity, pesan);
   };
   return (
     <section id="pesan" className="bg-card px-4 py-20 sm:px-6 lg:px-8">
@@ -955,7 +952,7 @@ function OrderSection({
             {status === "error"
               ? "⚠️ Mohon isi Nama, Produk, dan Jumlah kebutuhan Anda!"
               : status === "success"
-                ? "Pesanan siap dikirim. Integrasi webhook akan ditambahkan nanti."
+                ? "Pesan Telah Dikirim, Whatsapp Akan Terbuka Otomatis untuk mengirimkan pesan."
                 : "*Menekan tombol di atas akan membuka aplikasi WhatsApp dengan pesan terformat."}
           </p>
         </form>
