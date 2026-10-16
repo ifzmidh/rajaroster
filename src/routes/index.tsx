@@ -220,8 +220,8 @@ const faqs = [
 
 type LightboxImage = { src: string; alt: string; caption: string };
 
-const SCRIPT_URL = import.meta.env["APP_SCRIPT_URL"] || "";
-const WHATSAPP_TARGET = import.meta.env["WHATSAPP_TARGET"] || "";
+const SCRIPT_URL = import.meta.env["APP_SCRIPT_URL"]
+const WHATSAPP_TARGET = import.meta.env["WHATSAPP_TARGET"]
 
 async function sendToSheetAndRedirect(
   nama: string,
