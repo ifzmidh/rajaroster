@@ -28,6 +28,7 @@ import heroImage from "@/assets/raja-roster-hero.jpg";
 import rosterImage from "@/assets/product-roster.jpg";
 import pillarImage from "@/assets/product-pillar.jpg";
 import reliefImage from "@/assets/product-relief.jpg";
+import { Chatbot } from "@/components/Chatbot";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -336,6 +337,7 @@ function RajaRosterPage() {
           <span>{notice}</span>
         </div>
       ) : null}
+      <Chatbot whatsappTarget={WHATSAPP_TARGET} onNavigate={scrollTo} />
     </div>
   );
 }
